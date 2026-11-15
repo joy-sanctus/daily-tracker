@@ -1,80 +1,211 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>My Daily Tracker - Uganda</title>
+<title>MoneyTracker UG - Daily Income & Expense</title>
 <style>
-body{font-family:Arial;padding:15px;background:#f5f5f5}
-h2{color:#0f7a4a;text-align:center}
-.card{background:white;padding:15px;border-radius:10px;margin-bottom:15px;box-shadow:0 2px 5px #ddd}
-input,select{width:100%;padding:10px;margin:5px 0;border:1px solid #ddd;border-radius:8px}
-button{width:100%;padding:12px;background:#0f7a4a;color:white;border:none;border-radius:8px;font-size:16px}
-table{width:100%;background:white;border-collapse:collapse}
+*{box-sizing:border-box}
+body{font-family:Arial,sans-serif;padding:12px;background:#f0f4f1;margin:0}
+h2{color:#0f7a4a;text-align:center;margin:8px 0 2px}
+p.sub{text-align:center;color:#666;font-size:13px;margin:0 0 12px}
+.card{background:white;padding:14px;border-radius:12px;margin-bottom:12px;box-shadow:0 2px 8px #ddd}
+input,select{width:100%;padding:11px;margin:5px 0;border:1px solid #ddd;border-radius:8px;font-size:15px}
+button{width:100%;padding:12px;background:#0f7a4a;color:white;border:none;border-radius:8px;font-size:16px;cursor:pointer}
+button.small{width:auto;padding:6px 10px;font-size:13px}
+button.red{background:#c62828}
+button.blue{background:#1565c0}
+button.grey{background:#eee;color:#333}
+.flex{display:flex;gap:8px}
+.flex>*{flex:1}
+table{width:100%;border-collapse:collapse;background:white}
 td,th{padding:8px;border-bottom:1px solid #eee;text-align:left;font-size:14px}
-.green{color:green}.red{color:red}
+.green{color:#0f7a4a}.red{color:#c62828}
+.kpi{display:flex;gap:8px;text-align:center}
+.kpi div{flex:1;background:#f7f7f7;padding:10px;border-radius:10px}
+.kpi b{display:block;font-size:18px}
+.bar{height:14px;background:#eee;border-radius:10px;overflow:hidden;margin:4px 0 10px}
+.bar div{height:100%;background:#0f7a4a}
+.year-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #eee;font-size:14px}
 </style>
 </head>
 <body>
-<h2>🇺🇬 Daily Income & Expense</h2>
+<h2>🇺🇬 MoneyTracker UG</h2>
+<p class="sub">For Individuals • Small Businesses • Schools • Churches • SACCOs</p>
 
 <div class="card">
-<h3>Add Transaction</h3>
+<h3>➕ Add Transaction</h3>
 <input type="date" id="date">
 <input type="text" id="desc" placeholder="Description e.g. Sold tomatoes">
-<select id="type"><option>Income</option><option>Expense</option></select>
-<select id="cat">
-<option>Business Sales</option><option>Salary</option><option>Food</option>
-<option>Rent</option><option>Transport</option><option>Stock Purchase</option>
-<option>UMEME</option><option>Airtime</option><option>Other</option>
+<div class="flex">
+<select id="type" onchange="loadCats()">
+<option value="Income">Income 💰</option>
+<option value="Expense">Expense 💸</option>
+</select>
+<select id="cat"></select>
+</div>
+<select id="mode">
+<option>Cash</option><option>Mobile Money</option><option>Bank</option><option>Other</option>
 </select>
 <input type="number" id="amount" placeholder="Amount UGX e.g. 50000">
-<button onclick="add()">+ Add</button>
+<button onclick="add()">+ Add Transaction</button>
 </div>
 
 <div class="card">
-<h3>This Month: <span id="monthLabel"></span></h3>
-<p>Income: <b class="green" id="totIn">0</b></p>
-<p>Expense: <b class="red" id="totOut">0</b></p>
-<p>Balance: <b id="bal">0</b></p>
-<p>Savings %: <b id="pct">0%</b></p>
+<h3>📅 Filter</h3>
+<div class="flex">
+<select id="filterMonth" onchange="render()"></select>
+<select id="filterYear" onchange="render()"></select>
+</div>
+<div class="flex" style="margin-top:8px">
+<button class="blue" onclick="setThisMonth()">This Month</button>
+<button class="grey" onclick="exportCSV()">⬇ Export Excel (CSV)</button>
+</div>
+<div class="kpi" style="margin-top:12px">
+<div><small>Income</small><b class="green" id="totIn">0</b></div>
+<div><small>Expense</small><b class="red" id="totOut">0</b></div>
+<div><small>Balance</small><b id="bal">0</b></div>
+</div>
+<p style="text-align:center;margin:8px 0 0">Savings: <b id="pct">0%</b> • Transactions: <b id="count">0</b></p>
 </div>
 
 <div class="card">
-<h3>All Transactions</h3>
-<table><thead><tr><th>Date</th><th>Desc</th><th>Amount</th><th></th></tr></thead>
+<h3>📊 Where Did Money Go? (Expenses by Category)</h3>
+<div id="pie"></div>
+</div>
+
+<div class="card">
+<h3>📆 Yearly Summary - <span id="yearLabel"></span></h3>
+<div id="yearly"></div>
+<p style="font-size:13px;color:#555">Year Total Income: <b class="green" id="yIn">0</b> | Expense: <b class="red" id="yOut">0</b> | Net: <b id="yNet">0</b></p>
+</div>
+
+<div class="card">
+<h3>🧾 All Transactions</h3>
+<input type="text" id="search" placeholder="Search e.g. tomatoes..." oninput="render()">
+<table><thead><tr><th>Date</th><th>Details</th><th>Amount</th><th></th></tr></thead>
 <tbody id="list"></tbody></table>
-<button onclick="clearAll()" style="background:#c00;margin-top:10px">Clear All Data</button>
+<button class="red" onclick="clearAll()" style="margin-top:10px">Clear All Data</button>
+</div>
+
+<div class="card">
+<h3>⚙️ Settings - Categories</h3>
+<p style="font-size:13px;color:#666">Add your own category. It will appear in dropdown instantly.</p>
+<div class="flex">
+<select id="newType"><option>Income</option><option>Expense</option></select>
+<input type="text" id="newCat" placeholder="New category e.g. School Fees">
+</div>
+<button onclick="addCat()">+ Add Category</button>
+<div id="catList" style="margin-top:10px;font-size:13px"></div>
 </div>
 
 <script>
-let data = JSON.parse(localStorage.getItem('tracker')||'[]');
-function save(){localStorage.setItem('tracker',JSON.stringify(data)); render();}
+let CATS = JSON.parse(localStorage.getItem('mt_cats')||'null') || {
+ Income:["Business Sales","Salary","School Fees Received","Other Income"],
+ Expense:["Food","Rent","Transport","Stock Purchase","Staff Salary","UMEME / Electricity","Airtime / Data","School Supplies","Other Expense"]
+};
+let data = JSON.parse(localStorage.getItem('mt_data')||'[]');
+
+function saveCats(){localStorage.setItem('mt_cats',JSON.stringify(CATS));}
+function save(){localStorage.setItem('mt_data',JSON.stringify(data));}
+function loadCats(){
+ let t=document.getElementById('type').value;
+ let sel=document.getElementById('cat');
+ sel.innerHTML=CATS[t].map(c=>`<option>${c}</option>`).join('');
+}
+function addCat(){
+ let t=document.getElementById('newType').value;
+ let v=document.getElementById('newCat').value.trim();
+ if(!v) return alert('Type category name');
+ if(!CATS[t].includes(v)) CATS[t].push(v);
+ saveCats(); loadCats(); renderCats(); document.getElementById('newCat').value='';
+}
+function renderCats(){
+ let h='';
+ for(let k in CATS){ h+=`<b>${k}:</b> ${CATS[k].join(', ')}<br>`; }
+ document.getElementById('catList').innerHTML=h;
+}
 function add(){
- let d={date:document.getElementById('date').value||new Date().toISOString().slice(0,10),
- desc:document.getElementById('desc').value,
- type:document.getElementById('type').value,
- cat:document.getElementById('cat').value,
- amount:parseFloat(document.getElementById('amount').value)};
- if(!d.amount||!d.desc){alert('Fill description and amount');return;}
- data.push(d); save(); document.getElementById('desc').value=''; document.getElementById('amount').value='';
+ let d=document.getElementById('date').value||new Date().toISOString().slice(0,10);
+ let desc=document.getElementById('desc').value.trim();
+ let amt=parseFloat(document.getElementById('amount').value);
+ if(!desc||!amt) return alert('Fill description and amount');
+ data.push({id:Date.now(),date:d,desc:desc,type:document.getElementById('type').value,cat:document.getElementById('cat').value,mode:document.getElementById('mode').value,amount:amt});
+ save(); render();
+ document.getElementById('desc').value=''; document.getElementById('amount').value='';
+}
+function del(id){ data=data.filter(x=>x.id!==id); save(); render(); }
+function clearAll(){ if(confirm('Delete ALL transactions? This cannot be undone.')){ data=[]; save(); render(); } }
+function setThisMonth(){
+ let n=new Date(); let m=n.toISOString().slice(0,7); let y=n.getFullYear().toString();
+ document.getElementById('filterMonth').value=m; document.getElementById('filterYear').value=y; render();
+}
+function exportCSV(){
+ let csv="Date,Description,Type,Category,Payment Mode,Amount\n";
+ data.forEach(t=>{ csv+=`${t.date},"${t.desc}",${t.type},${t.cat},${t.mode},${t.amount}\n`; });
+ let a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='MoneyTracker-UG.csv'; a.click();
+}
+function initFilters(){
+ let months=[]; let years=new Set();
+ data.forEach(t=>{ if(!months.includes(t.date.slice(0,7))) months.push(t.date.slice(0,7)); years.add(t.date.slice(0,4)); });
+ let cur=new Date().toISOString().slice(0,7); if(!months.includes(cur)) months.unshift(cur);
+ let curY=new Date().getFullYear().toString(); if(!years.has(curY)) years.add(curY);
+ months.sort().reverse();
+ document.getElementById('filterMonth').innerHTML=months.map(m=>`<option value="${m}">${m}</option>`).join('');
+ document.getElementById('filterYear').innerHTML=[...years].sort().reverse().map(y=>`<option>${y}</option>`).join('');
+ document.getElementById('filterMonth').value=cur; document.getElementById('filterYear').value=curY;
 }
 function render(){
- let m=new Date().toISOString().slice(0,7);
- document.getElementById('monthLabel').innerText=m;
- let inn=0,out=0,html='';
- data.slice().reverse().forEach((t,i)=>{
-   if(t.date.startsWith(m)){ if(t.type=='Income') inn+=t.amount; else out+=t.amount; }
-   html+=`<tr><td>${t.date}</td><td>${t.desc}<br><small>${t.cat}</small></td><td class="${t.type=='Income'?'green':'red'}">${t.type=='Income'?'+':'-'}${t.amount.toLocaleString()}</td><td><button onclick="del(${data.indexOf(t)})" style="width:auto;padding:5px;background:#eee;color:#000">x</button></td></tr>`;
+ initFilters();
+ // Keep selected values if user changed
+ let selM=document.getElementById('filterMonth').value;
+ let selY=document.getElementById('filterYear').value;
+ let search=(document.getElementById('search').value||'').toLowerCase();
+ let inn=0,out=0,html='',catTotals={};
+ let filtered=data.filter(t=>t.date.startsWith(selM));
+ filtered.forEach(t=>{
+   if(t.type=='Income') inn+=t.amount; else { out+=t.amount; catTotals[t.cat]=(catTotals[t.cat]||0)+t.amount; }
  });
  document.getElementById('totIn').innerText=inn.toLocaleString();
  document.getElementById('totOut').innerText=out.toLocaleString();
  document.getElementById('bal').innerText=(inn-out).toLocaleString();
  document.getElementById('pct').innerText=inn?Math.round((inn-out)/inn*100)+'%':'0%';
- document.getElementById('list').innerHTML=html;
+ document.getElementById('count').innerText=filtered.length;
+
+ // Pie - as bars (works without library)
+ let totalOut=out||1; let pieHtml='';
+ Object.entries(catTotals).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>{
+   let pct=Math.round(v/totalOut*100);
+   pieHtml+=`<div style="display:flex;justify-content:space-between;font-size:14px"><span>${k}</span><b>${v.toLocaleString()} (${pct}%)</b></div><div class="bar"><div style="width:${pct}%"></div></div>`;
+ });
+ document.getElementById('pie').innerHTML=pieHtml||'No expenses this month yet.';
+
+ // Yearly
+ let yIn=0,yOut=0,yHtml='';
+ const monthNames=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+ monthNames.forEach((mn,i)=>{
+   let mm=selY+'-'+String(i+1).padStart(2,'0');
+   let mi=0,mo=0;
+   data.forEach(t=>{ if(t.date.startsWith(mm)){ if(t.type=='Income') mi+=t.amount; else mo+=t.amount; }});
+   yIn+=mi; yOut+=mo;
+   yHtml+=`<div class="year-row"><span>${mn} ${selY}</span><span><span class="green">+${mi.toLocaleString()}</span> / <span class="red">-${mo.toLocaleString()}</span> = <b>${(mi-mo).toLocaleString()}</b></span></div>`;
+ });
+ document.getElementById('yearly').innerHTML=yHtml;
+ document.getElementById('yearLabel').innerText=selY;
+ document.getElementById('yIn').innerText=yIn.toLocaleString();
+ document.getElementById('yOut').innerText=yOut.toLocaleString();
+ document.getElementById('yNet').innerText=(yIn-yOut).toLocaleString();
+
+ // List - filter by search + month
+ let listHtml='';
+ data.slice().reverse().forEach(t=>{
+   if(!t.date.startsWith(selM)) return;
+   if(search && !t.desc.toLowerCase().includes(search) && !t.cat.toLowerCase().includes(search)) return;
+   listHtml+=`<tr><td>${t.date}<br><small>${t.mode}</small></td><td>${t.desc}<br><small>${t.cat}</small></td><td class="${t.type=='Income'?'green':'red'}">${t.type=='Income'?'+':'-'}${t.amount.toLocaleString()}</td><td><button class="small grey" onclick="del(${t.id})">x</button></td></tr>`;
+ });
+ document.getElementById('list').innerHTML=listHtml||'<tr><td colspan="4" style="text-align:center;color:#888">No transactions this month. Add one above.</td></tr>';
 }
-function del(i){data.splice(i,1);save();}
-function clearAll(){if(confirm('Delete all?')){data=[];save();}}
-render();
+loadCats(); renderCats(); render();
 </script>
 </body>
 </html>
