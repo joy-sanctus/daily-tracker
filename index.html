@@ -2,210 +2,183 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MoneyTracker UG - Daily Income & Expense</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MoneyTracker UG</title>
 <style>
-*{box-sizing:border-box}
-body{font-family:Arial,sans-serif;padding:12px;background:#f0f4f1;margin:0}
-h2{color:#0f7a4a;text-align:center;margin:8px 0 2px}
-p.sub{text-align:center;color:#666;font-size:13px;margin:0 0 12px}
-.card{background:white;padding:14px;border-radius:12px;margin-bottom:12px;box-shadow:0 2px 8px #ddd}
-input,select{width:100%;padding:11px;margin:5px 0;border:1px solid #ddd;border-radius:8px;font-size:15px}
-button{width:100%;padding:12px;background:#0f7a4a;color:white;border:none;border-radius:8px;font-size:16px;cursor:pointer}
-button.small{width:auto;padding:6px 10px;font-size:13px}
-button.red{background:#c62828}
-button.blue{background:#1565c0}
-button.grey{background:#eee;color:#333}
-.flex{display:flex;gap:8px}
-.flex>*{flex:1}
-table{width:100%;border-collapse:collapse;background:white}
-td,th{padding:8px;border-bottom:1px solid #eee;text-align:left;font-size:14px}
-.green{color:#0f7a4a}.red{color:#c62828}
-.kpi{display:flex;gap:8px;text-align:center}
-.kpi div{flex:1;background:#f7f7f7;padding:10px;border-radius:10px}
-.kpi b{display:block;font-size:18px}
-.bar{height:14px;background:#eee;border-radius:10px;overflow:hidden;margin:4px 0 10px}
-.bar div{height:100%;background:#0f7a4a}
-.year-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #eee;font-size:14px}
+*{box-sizing:border-box} body{font-family:Arial,sans-serif;background:#f2f4f7;margin:0;padding:12px;color:#222}
+h1{text-align:center;color:#0a7a42;margin:6px 0 2px} p.sub{text-align:center;color:#666;margin:0 0 12px;font-size:13px}
+.card{background:#fff;border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.row{display:flex;gap:8px;flex-wrap:wrap} .row>*{flex:1;min-width:120px}
+input,select,button{width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;font-size:15px;margin-top:6px}
+button{background:#0a7a42;color:#fff;border:none;font-weight:bold;cursor:pointer}
+button.secondary{background:#eee;color:#222} button.danger{background:#c0392b}
+button.small{padding:7px;font-size:13px}
+.summary{display:flex;gap:8px;text-align:center} .summary div{flex:1;background:#f8f9fa;border-radius:10px;padding:10px}
+.summary b{font-size:18px;display:block} .inc{color:#0a7a42} .exp{color:#c0392b}
+.bar-row{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13px}
+.bar-row span:first-child{width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar{flex:1;background:#eee;height:18px;border-radius:10px;overflow:hidden} .bar i{display:block;height:100%;background:#ff7a00}
+table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
+.badge{padding:3px 8px;border-radius:20px;font-size:11px;color:#fff} .badge.Income{background:#0a7a42} .badge.Expense{background:#c0392b}
+#lockScreen{position:fixed;inset:0;background:#0a7a42;display:flex;align-items:center;justify-content:center;z-index:99;padding:16px}
+#lockBox{background:#fff;border-radius:16px;padding:22px;width:100%;max-width:360px;text-align:center}
+#lockBox h2{margin:0 0 6px} #lockBox p{color:#666;font-size:13px}
+.hidden{display:none!important}
+.year-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.year-grid div{background:#f8f9fa;border-radius:10px;padding:8px;font-size:12px;text-align:center}
 </style>
 </head>
 <body>
-<h2>🇺🇬 MoneyTracker UG</h2>
-<p class="sub">For Individuals • Small Businesses • Schools • Churches • SACCOs</p>
 
-<div class="card">
-<h3>➕ Add Transaction</h3>
-<input type="date" id="date">
-<input type="text" id="desc" placeholder="Description e.g. Sold tomatoes">
-<div class="flex">
-<select id="type" onchange="loadCats()">
-<option value="Income">Income 💰</option>
-<option value="Expense">Expense 💸</option>
-</select>
-<select id="cat"></select>
-</div>
-<select id="mode">
-<option>Cash</option><option>Mobile Money</option><option>Bank</option><option>Other</option>
-</select>
-<input type="number" id="amount" placeholder="Amount UGX e.g. 50000">
-<button onclick="add()">+ Add Transaction</button>
+<!-- LOCK SCREEN -->
+<div id="lockScreen">
+  <div id="lockBox">
+    <h2>🔒 MoneyTracker UG</h2>
+    <p id="lockText">Create a 4-digit PIN to protect your money</p>
+    <input type="password" id="pinInput" placeholder="Enter 4-digit PIN" maxlength="4" inputmode="numeric">
+    <input type="password" id="pinConfirm" placeholder="Confirm PIN (first time only)" maxlength="4" inputmode="numeric" class="hidden">
+    <button onclick="handlePin()">Unlock / Create PIN</button>
+    <button class="secondary" onclick="forgotPin()" style="margin-top:8px">Forgot PIN? Reset (clears data)</button>
+    <p style="font-size:11px;color:#999">PIN is saved only on this phone/browser.</p>
+  </div>
 </div>
 
-<div class="card">
-<h3>📅 Filter</h3>
-<div class="flex">
-<select id="filterMonth" onchange="render()"></select>
-<select id="filterYear" onchange="render()"></select>
-</div>
-<div class="flex" style="margin-top:8px">
-<button class="blue" onclick="setThisMonth()">This Month</button>
-<button class="grey" onclick="exportCSV()">⬇ Export Excel (CSV)</button>
-</div>
-<div class="kpi" style="margin-top:12px">
-<div><small>Income</small><b class="green" id="totIn">0</b></div>
-<div><small>Expense</small><b class="red" id="totOut">0</b></div>
-<div><small>Balance</small><b id="bal">0</b></div>
-</div>
-<p style="text-align:center;margin:8px 0 0">Savings: <b id="pct">0%</b> • Transactions: <b id="count">0</b></p>
+<div id="app">
+<h1>MoneyTracker UG</h1>
+<p class="sub">Daily Income & Expense • UGX • Version 3 - Password + Backup</p>
+
+<div class="card summary">
+  <div><span>Income</span><b class="inc" id="totalInc">0</b></div>
+  <div><span>Expense</span><b class="exp" id="totalExp">0</b></div>
+  <div><span>Balance</span><b id="totalBal">0</b></div>
 </div>
 
 <div class="card">
-<h3>📊 Where Did Money Go? (Expenses by Category)</h3>
-<div id="pie"></div>
+  <div class="row">
+    <div><label>Filter Month</label><select id="filterMonth"></select></div>
+    <div><label>Filter Year</label><select id="filterYear"></select></div>
+  </div>
+  <div class="row">
+    <button onclick="exportCSV()">Export Excel (CSV)</button>
+    <button class="secondary" onclick="downloadBackup()">⬇ Backup Data</button>
+    <button class="secondary" onclick="document.getElementById('restoreFile').click()">⬆ Restore Backup</button>
+    <input type="file" id="restoreFile" accept=".json" class="hidden" onchange="restoreBackup(event)">
+  </div>
+  <div class="row">
+    <button class="secondary small" onclick="changePin()">Change PIN</button>
+    <button class="secondary small" onclick="lockApp()">Lock App</button>
+  </div>
 </div>
 
 <div class="card">
-<h3>📆 Yearly Summary - <span id="yearLabel"></span></h3>
-<div id="yearly"></div>
-<p style="font-size:13px;color:#555">Year Total Income: <b class="green" id="yIn">0</b> | Expense: <b class="red" id="yOut">0</b> | Net: <b id="yNet">0</b></p>
+  <h3 style="margin:0 0 6px">Add Transaction</h3>
+  <input id="desc" placeholder="Description e.g. Sold tomatoes / Lunch">
+  <div class="row">
+    <select id="type" onchange="updateCats()"><option value="Income">Income</option><option value="Expense">Expense</option></select>
+    <select id="cat"></select>
+    <input type="number" id="amt" placeholder="Amount UGX">
+  </div>
+  <div class="row"><input type="date" id="date"><button onclick="addTx()">Add Transaction</button></div>
 </div>
 
 <div class="card">
-<h3>🧾 All Transactions</h3>
-<input type="text" id="search" placeholder="Search e.g. tomatoes..." oninput="render()">
-<table><thead><tr><th>Date</th><th>Details</th><th>Amount</th><th></th></tr></thead>
-<tbody id="list"></tbody></table>
-<button class="red" onclick="clearAll()" style="margin-top:10px">Clear All Data</button>
+  <h3 style="margin:0 0 6px">Where Did Money Go?</h3>
+  <div id="bars">No expenses yet</div>
 </div>
 
 <div class="card">
-<h3>⚙️ Settings - Categories</h3>
-<p style="font-size:13px;color:#666">Add your own category. It will appear in dropdown instantly.</p>
-<div class="flex">
-<select id="newType"><option>Income</option><option>Expense</option></select>
-<input type="text" id="newCat" placeholder="New category e.g. School Fees">
+  <h3 style="margin:0 0 6px">Yearly Summary - <span id="yearLabel">2026</span></h3>
+  <div class="year-grid" id="yearGrid"></div>
 </div>
-<button onclick="addCat()">+ Add Category</button>
-<div id="catList" style="margin-top:10px;font-size:13px"></div>
+
+<div class="card">
+  <h3 style="margin:0 0 6px">Settings - Categories</h3>
+  <div class="row"><input id="newCat" placeholder="New category e.g. Transport"><select id="catType"><option>Income</option><option>Expense</option></select></div>
+  <button class="secondary" onclick="addCat()" style="margin-top:6px">Add Category</button>
+  <div id="catList" style="margin-top:8px;font-size:13px"></div>
+</div>
+
+<div class="card">
+  <h3 style="margin:0 0 6px">Transactions</h3>
+  <table><thead><tr><th>Date</th><th>Desc</th><th>Cat</th><th>Type</th><th>Amount</th><th></th></tr></thead><tbody id="txList"></tbody></table>
+  <button class="danger" onclick="clearAll()" style="margin-top:10px">Clear All Data</button>
+</div>
 </div>
 
 <script>
-let CATS = JSON.parse(localStorage.getItem('mt_cats')||'null') || {
- Income:["Business Sales","Salary","School Fees Received","Other Income"],
- Expense:["Food","Rent","Transport","Stock Purchase","Staff Salary","UMEME / Electricity","Airtime / Data","School Supplies","Other Expense"]
-};
-let data = JSON.parse(localStorage.getItem('mt_data')||'[]');
+let txs = JSON.parse(localStorage.getItem('mt_txs')||'[]');
+let cats = JSON.parse(localStorage.getItem('mt_cats')||'{"Income":["Sales","Salary","Other"],"Expense":["Food","Transport","Rent","Airtime","Other"]}');
+const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const fmt=n=>Number(n).toLocaleString('en-UG');
 
-function saveCats(){localStorage.setItem('mt_cats',JSON.stringify(CATS));}
-function save(){localStorage.setItem('mt_data',JSON.stringify(data));}
-function loadCats(){
- let t=document.getElementById('type').value;
- let sel=document.getElementById('cat');
- sel.innerHTML=CATS[t].map(c=>`<option>${c}</option>`).join('');
+function save(){localStorage.setItem('mt_txs',JSON.stringify(txs));localStorage.setItem('mt_cats',JSON.stringify(cats));render();}
+function updateCats(){let t=document.getElementById('type').value;let s=document.getElementById('cat');s.innerHTML=cats[t].map(c=>`<option>${c}</option>`).join('');}
+function addTx(){
+  let d=document.getElementById('desc').value.trim(),a=parseFloat(document.getElementById('amt').value),dt=document.getElementById('date').value;
+  if(!d||!a||!dt) return alert('Fill description, amount and date');
+  txs.unshift({desc:d,type:document.getElementById('type').value,cat:document.getElementById('cat').value,amt:a,date:dt});
+  document.getElementById('desc').value='';document.getElementById('amt').value='';save();
 }
-function addCat(){
- let t=document.getElementById('newType').value;
- let v=document.getElementById('newCat').value.trim();
- if(!v) return alert('Type category name');
- if(!CATS[t].includes(v)) CATS[t].push(v);
- saveCats(); loadCats(); renderCats(); document.getElementById('newCat').value='';
-}
-function renderCats(){
- let h='';
- for(let k in CATS){ h+=`<b>${k}:</b> ${CATS[k].join(', ')}<br>`; }
- document.getElementById('catList').innerHTML=h;
-}
-function add(){
- let d=document.getElementById('date').value||new Date().toISOString().slice(0,10);
- let desc=document.getElementById('desc').value.trim();
- let amt=parseFloat(document.getElementById('amount').value);
- if(!desc||!amt) return alert('Fill description and amount');
- data.push({id:Date.now(),date:d,desc:desc,type:document.getElementById('type').value,cat:document.getElementById('cat').value,mode:document.getElementById('mode').value,amount:amt});
- save(); render();
- document.getElementById('desc').value=''; document.getElementById('amount').value='';
-}
-function del(id){ data=data.filter(x=>x.id!==id); save(); render(); }
-function clearAll(){ if(confirm('Delete ALL transactions? This cannot be undone.')){ data=[]; save(); render(); } }
-function setThisMonth(){
- let n=new Date(); let m=n.toISOString().slice(0,7); let y=n.getFullYear().toString();
- document.getElementById('filterMonth').value=m; document.getElementById('filterYear').value=y; render();
+function delTx(i){if(confirm('Delete this?')){txs.splice(i,1);save();}}
+function addCat(){let n=document.getElementById('newCat').value.trim(),t=document.getElementById('catType').value;if(!n)return;if(!cats[t].includes(n))cats[t].push(n);document.getElementById('newCat').value='';save();updateCats();}
+function clearAll(){if(confirm('Delete ALL transactions? Backup first!')){txs=[];save();}}
+
+function render(){
+  let fm=document.getElementById('filterMonth').value, fy=document.getElementById('filterYear').value;
+  let filtered=txs.filter(t=>{let [y,m]=t.date.split('-');return (!fm||m==fm)&&(!fy||y==fy);});
+  let inc=filtered.filter(t=>t.type=='Income').reduce((s,t)=>s+t.amt,0);
+  let exp=filtered.filter(t=>t.type=='Expense').reduce((s,t)=>s+t.amt,0);
+  document.getElementById('totalInc').textContent=fmt(inc);
+  document.getElementById('totalExp').textContent=fmt(exp);
+  document.getElementById('totalBal').textContent=fmt(inc-exp);
+  document.getElementById('yearLabel').textContent=fy||'2026';
+  // bars
+  let byCat={};filtered.filter(t=>t.type=='Expense').forEach(t=>byCat[t.cat]=(byCat[t.cat]||0)+t.amt);
+  let max=Math.max(...Object.values(byCat),1);
+  document.getElementById('bars').innerHTML=Object.keys(byCat).length?Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="bar-row"><span>${k}</span><div class="bar"><i style="width:${v/max*100}%"></i></div><b>${fmt(v)}</b></div>`).join(''):'No expenses yet';
+  // year
+  let y=parseInt(fy||new Date().getFullYear());
+  document.getElementById('yearGrid').innerHTML=months.map((mn,i)=>{let mm=String(i+1).padStart(2,'0');let ti=txs.filter(t=>t.date.startsWith(y+'-'+mm)&&t.type=='Income').reduce((s,t)=>s+t.amt,0);let te=txs.filter(t=>t.date.startsWith(y+'-'+mm)&&t.type=='Expense').reduce((s,t)=>s+t.amt,0);return `<div><b>${mn}</b><br><span class="inc">+${fmt(ti)}</span><br><span class="exp">-${fmt(te)}</span></div>`}).join('');
+  // list - show filtered, but delete needs original index
+  document.getElementById('txList').innerHTML=filtered.map(t=>{let idx=txs.indexOf(t);return `<tr><td>${t.date}</td><td>${t.desc}</td><td>${t.cat}</td><td><span class="badge ${t.type}">${t.type}</span></td><td>${fmt(t.amt)}</td><td><button class="danger small" onclick="delTx(${idx})">X</button></td></tr>`}).join('')||'<tr><td colspan=6>No transactions</td></tr>';
+  document.getElementById('catList').innerHTML='Income: '+cats.Income.join(', ')+'<br>Expense: '+cats.Expense.join(', ');
 }
 function exportCSV(){
- let csv="Date,Description,Type,Category,Payment Mode,Amount\n";
- data.forEach(t=>{ csv+=`${t.date},"${t.desc}",${t.type},${t.cat},${t.mode},${t.amount}\n`; });
- let a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='MoneyTracker-UG.csv'; a.click();
+  let rows=[['Date','Description','Category','Type','Amount']];txs.forEach(t=>rows.push([t.date,t.desc,t.cat,t.type,t.amt]));
+  let csv=rows.map(r=>r.join(',')).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='moneytracker.csv';a.click();
 }
-function initFilters(){
- let months=[]; let years=new Set();
- data.forEach(t=>{ if(!months.includes(t.date.slice(0,7))) months.push(t.date.slice(0,7)); years.add(t.date.slice(0,4)); });
- let cur=new Date().toISOString().slice(0,7); if(!months.includes(cur)) months.unshift(cur);
- let curY=new Date().getFullYear().toString(); if(!years.has(curY)) years.add(curY);
- months.sort().reverse();
- document.getElementById('filterMonth').innerHTML=months.map(m=>`<option value="${m}">${m}</option>`).join('');
- document.getElementById('filterYear').innerHTML=[...years].sort().reverse().map(y=>`<option>${y}</option>`).join('');
- document.getElementById('filterMonth').value=cur; document.getElementById('filterYear').value=curY;
+function downloadBackup(){
+  let data={txs,cats,exported:new Date().toISOString()};
+  let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));a.download='moneytracker-backup.json';a.click();alert('Backup downloaded! Save it in WhatsApp / Drive.');
 }
-function render(){
- initFilters();
- // Keep selected values if user changed
- let selM=document.getElementById('filterMonth').value;
- let selY=document.getElementById('filterYear').value;
- let search=(document.getElementById('search').value||'').toLowerCase();
- let inn=0,out=0,html='',catTotals={};
- let filtered=data.filter(t=>t.date.startsWith(selM));
- filtered.forEach(t=>{
-   if(t.type=='Income') inn+=t.amount; else { out+=t.amount; catTotals[t.cat]=(catTotals[t.cat]||0)+t.amount; }
- });
- document.getElementById('totIn').innerText=inn.toLocaleString();
- document.getElementById('totOut').innerText=out.toLocaleString();
- document.getElementById('bal').innerText=(inn-out).toLocaleString();
- document.getElementById('pct').innerText=inn?Math.round((inn-out)/inn*100)+'%':'0%';
- document.getElementById('count').innerText=filtered.length;
-
- // Pie - as bars (works without library)
- let totalOut=out||1; let pieHtml='';
- Object.entries(catTotals).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>{
-   let pct=Math.round(v/totalOut*100);
-   pieHtml+=`<div style="display:flex;justify-content:space-between;font-size:14px"><span>${k}</span><b>${v.toLocaleString()} (${pct}%)</b></div><div class="bar"><div style="width:${pct}%"></div></div>`;
- });
- document.getElementById('pie').innerHTML=pieHtml||'No expenses this month yet.';
-
- // Yearly
- let yIn=0,yOut=0,yHtml='';
- const monthNames=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
- monthNames.forEach((mn,i)=>{
-   let mm=selY+'-'+String(i+1).padStart(2,'0');
-   let mi=0,mo=0;
-   data.forEach(t=>{ if(t.date.startsWith(mm)){ if(t.type=='Income') mi+=t.amount; else mo+=t.amount; }});
-   yIn+=mi; yOut+=mo;
-   yHtml+=`<div class="year-row"><span>${mn} ${selY}</span><span><span class="green">+${mi.toLocaleString()}</span> / <span class="red">-${mo.toLocaleString()}</span> = <b>${(mi-mo).toLocaleString()}</b></span></div>`;
- });
- document.getElementById('yearly').innerHTML=yHtml;
- document.getElementById('yearLabel').innerText=selY;
- document.getElementById('yIn').innerText=yIn.toLocaleString();
- document.getElementById('yOut').innerText=yOut.toLocaleString();
- document.getElementById('yNet').innerText=(yIn-yOut).toLocaleString();
-
- // List - filter by search + month
- let listHtml='';
- data.slice().reverse().forEach(t=>{
-   if(!t.date.startsWith(selM)) return;
-   if(search && !t.desc.toLowerCase().includes(search) && !t.cat.toLowerCase().includes(search)) return;
-   listHtml+=`<tr><td>${t.date}<br><small>${t.mode}</small></td><td>${t.desc}<br><small>${t.cat}</small></td><td class="${t.type=='Income'?'green':'red'}">${t.type=='Income'?'+':'-'}${t.amount.toLocaleString()}</td><td><button class="small grey" onclick="del(${t.id})">x</button></td></tr>`;
- });
- document.getElementById('list').innerHTML=listHtml||'<tr><td colspan="4" style="text-align:center;color:#888">No transactions this month. Add one above.</td></tr>';
+function restoreBackup(e){
+  let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(d.txs){txs=d.txs;cats=d.cats||cats;save();alert('Restored '+txs.length+' transactions!');}else alert('Invalid backup file');}catch{alert('Invalid backup file');}};r.readAsText(f);
 }
-loadCats(); renderCats(); render();
+// PIN LOGIC
+function handlePin(){
+  let pin=document.getElementById('pinInput').value, conf=document.getElementById('pinConfirm').value;
+  let saved=localStorage.getItem('mt_pin');
+  if(!saved){
+    if(pin.length!==4) return alert('PIN must be 4 digits');
+    if(pin!==conf) return alert('PINs do not match');
+    localStorage.setItem('mt_pin',pin);unlock();alert('PIN created! Remember it.');
+  } else {
+    if(pin===saved) unlock(); else alert('Wrong PIN');
+  }
+}
+function unlock(){document.getElementById('lockScreen').classList.add('hidden');}
+function lockApp(){document.getElementById('lockScreen').classList.remove('hidden');document.getElementById('pinInput').value='';document.getElementById('lockText').textContent='Enter your PIN to unlock';document.getElementById('pinConfirm').classList.add('hidden');}
+function changePin(){let np=prompt('Enter new 4-digit PIN');if(np&&np.length===4){localStorage.setItem('mt_pin',np);alert('PIN changed');}else alert('PIN must be 4 digits');}
+function forgotPin(){if(confirm('Forgot PIN will CLEAR all data. Continue?')){localStorage.removeItem('mt_pin');localStorage.removeItem('mt_txs');txs=[];location.reload();}}
+// init filters
+let fm=document.getElementById('filterMonth');fm.innerHTML='<option value="">All Months</option>'+months.map((m,i)=>`<option value="${String(i+1).padStart(2,'0')}">${m}</option>`).join('');
+let fy=document.getElementById('filterYear');fy.innerHTML=[2025,2026,2027].map(y=>`<option ${y==2026?'selected':''}>${y}</option>`).join('');
+fm.value=String(new Date().getMonth()+1).padStart(2,'0');
+fm.onchange=fy.onchange=render;
+document.getElementById('date').value=new Date().toISOString().slice(0,10);
+// lock init
+if(!localStorage.getItem('mt_pin')){document.getElementById('pinConfirm').classList.remove('hidden');}else{document.getElementById('lockText').textContent='Enter your PIN to unlock';}
+updateCats();render();
 </script>
 </body>
 </html>
