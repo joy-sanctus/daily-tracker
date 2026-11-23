@@ -3,106 +3,134 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MoneyTracker UG</title>
+<title>MoneyTrack UG</title>
 <style>
-*{box-sizing:border-box} body{font-family:Arial,sans-serif;background:#f2f4f7;margin:0;padding:12px;color:#222}
-h1{text-align:center;color:#0a7a42;margin:6px 0 2px} p.sub{text-align:center;color:#666;margin:0 0 12px;font-size:13px}
-.card{background:#fff;border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+*{box-sizing:border-box} body{font-family:Arial,sans-serif;background:#121212;margin:0;padding:12px;color:#e8e8e8}
+.top{background:#0f3d24;border-radius:14px;padding:16px;text-align:center;margin-bottom:12px;border:1px solid #1e5a37}
+.top h1{margin:0;font-size:26px;color:#fff;letter-spacing:.3px}
+.top p{margin:6px 0 0;color:#b8e6c8;font-size:13px;line-height:1.4}
+.card{background:#1e1e1e;border:1px solid #333;border-radius:14px;padding:14px;margin-bottom:12px}
 .row{display:flex;gap:8px;flex-wrap:wrap} .row>*{flex:1;min-width:120px}
-input,select,button{width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;font-size:15px;margin-top:6px}
-button{background:#0a7a42;color:#fff;border:none;font-weight:bold;cursor:pointer}
-button.secondary{background:#eee;color:#222} button.danger{background:#c0392b}
-button.small{padding:7px;font-size:13px}
-.summary{display:flex;gap:8px;text-align:center} .summary div{flex:1;background:#f8f9fa;border-radius:10px;padding:10px}
-.summary b{font-size:18px;display:block} .inc{color:#0a7a42} .exp{color:#c0392b}
-.bar-row{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13px}
-.bar-row span:first-child{width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bar{flex:1;background:#eee;height:18px;border-radius:10px;overflow:hidden} .bar i{display:block;height:100%;background:#ff7a00}
-table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
-.badge{padding:3px 8px;border-radius:20px;font-size:11px;color:#fff} .badge.Income{background:#0a7a42} .badge.Expense{background:#c0392b}
-#lockScreen{position:fixed;inset:0;background:#0a7a42;display:flex;align-items:center;justify-content:center;z-index:99;padding:16px}
-#lockBox{background:#fff;border-radius:16px;padding:22px;width:100%;max-width:360px;text-align:center}
-#lockBox h2{margin:0 0 6px} #lockBox p{color:#666;font-size:13px}
+input,select,button{width:100%;padding:12px;border-radius:10px;border:1px solid #444;font-size:16px;margin-top:8px;background:#2a2a2a;color:#fff}
+input::placeholder{color:#999}
+select option{background:#2a2a2a}
+button{background:#00a651;color:#fff;border:none;font-weight:bold;cursor:pointer;font-size:16px;padding:14px}
+button.secondary{background:#333;color:#fff} button.danger{background:#c0392b} button.small{padding:9px;font-size:13px}
+label{font-size:13px;color:#bbb}
+.summary{display:flex;gap:8px;text-align:center} .summary div{flex:1;background:#2a2a2a;border-radius:12px;padding:12px;border:1px solid #333}
+.summary b{font-size:20px;display:block} .inc{color:#2ecc71} .exp{color:#ff6b6b} .bal{color:#ffd93d}
+.bar-row{display:flex;align-items:center;gap:8px;margin:7px 0;font-size:13px}
+.bar-row span:first-child{width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ddd}
+.bar{flex:1;background:#333;height:20px;border-radius:10px;overflow:hidden} .bar i{display:block;height:100%;background:#ff9500}
+table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:9px;border-bottom:1px solid #333;text-align:left}
+.badge{padding:4px 9px;border-radius:20px;font-size:11px;color:#fff} .badge.Income{background:#00a651} .badge.Expense{background:#c0392b}
+#lockScreen{position:fixed;inset:0;background:#0f3d24;display:flex;align-items:center;justify-content:center;z-index:99;padding:16px}
+#lockBox{background:#1e1e1e;border:1px solid #333;border-radius:16px;padding:22px;width:100%;max-width:360px;text-align:center;color:#fff}
+#lockBox h2{margin:0 0 6px} #lockBox p{color:#bbb;font-size:13px}
 .hidden{display:none!important}
 .year-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.year-grid div{background:#f8f9fa;border-radius:10px;padding:8px;font-size:12px;text-align:center}
+.year-grid div{background:#2a2a2a;border:1px solid #333;border-radius:10px;padding:9px;font-size:12px;text-align:center}
+h3{margin:0 0 8px;color:#fff}
 </style>
 </head>
 <body>
 
-<!-- LOCK SCREEN -->
 <div id="lockScreen">
   <div id="lockBox">
-    <h2>🔒 MoneyTracker UG</h2>
+    <h2>🔒 MoneyTrack UG</h2>
     <p id="lockText">Create a 4-digit PIN to protect your money</p>
     <input type="password" id="pinInput" placeholder="Enter 4-digit PIN" maxlength="4" inputmode="numeric">
     <input type="password" id="pinConfirm" placeholder="Confirm PIN (first time only)" maxlength="4" inputmode="numeric" class="hidden">
     <button onclick="handlePin()">Unlock / Create PIN</button>
     <button class="secondary" onclick="forgotPin()" style="margin-top:8px">Forgot PIN? Reset (clears data)</button>
-    <p style="font-size:11px;color:#999">PIN is saved only on this phone/browser.</p>
+    <p style="font-size:11px;color:#888">PIN is saved only on this phone/browser.</p>
   </div>
 </div>
 
 <div id="app">
-<h1>MoneyTracker UG</h1>
-<p class="sub">Daily Income & Expense • UGX • Version 3 - Password + Backup</p>
 
+<!-- TOP BAR - AS YOU ASKED -->
+<div class="top">
+  <h1>MoneyTrack UG</h1>
+  <p>Daily Income &amp; expenses. UGX. Individuals, Small businesses, SACCOs, Institutions.</p>
+</div>
+
+<!-- SUMMARY - STILL AT TOP SO YOU SEE BALANCE FAST -->
 <div class="card summary">
   <div><span>Income</span><b class="inc" id="totalInc">0</b></div>
   <div><span>Expense</span><b class="exp" id="totalExp">0</b></div>
-  <div><span>Balance</span><b id="totalBal">0</b></div>
+  <div><span>Balance</span><b class="bal" id="totalBal">0</b></div>
 </div>
 
+<!-- 1. ADD TRANSACTION - FIRST THING YOU SEE -->
+<div class="card" style="border:2px solid #00a651">
+  <h3>➕ Add Transaction</h3>
+  <input id="desc" placeholder="What is it? e.g. Sold tomatoes / Lunch">
+  <div class="row">
+    <div><label>Type</label><select id="type" onchange="updateCats()"><option value="Income">Income 💰</option><option value="Expense">Expense 💸</option></select></div>
+    <div><label>Category</label><select id="cat"></select></div>
+  </div>
+  <div class="row">
+    <div><label>Amount (UGX)</label><input type="number" id="amt" placeholder="e.g. 50000" inputmode="numeric"></div>
+    <div><label>Date</label><input type="date" id="date"></div>
+  </div>
+  <button onclick="addTx()">Add Transaction</button>
+</div>
+
+<!-- 2. FILTER -->
 <div class="card">
+  <h3>Filter</h3>
   <div class="row">
-    <div><label>Filter Month</label><select id="filterMonth"></select></div>
-    <div><label>Filter Year</label><select id="filterYear"></select></div>
-  </div>
-  <div class="row">
-    <button onclick="exportCSV()">Export Excel (CSV)</button>
-    <button class="secondary" onclick="downloadBackup()">⬇ Backup Data</button>
-    <button class="secondary" onclick="document.getElementById('restoreFile').click()">⬆ Restore Backup</button>
-    <input type="file" id="restoreFile" accept=".json" class="hidden" onchange="restoreBackup(event)">
-  </div>
-  <div class="row">
-    <button class="secondary small" onclick="changePin()">Change PIN</button>
-    <button class="secondary small" onclick="lockApp()">Lock App</button>
+    <div><label>Month</label><select id="filterMonth"></select></div>
+    <div><label>Year</label><select id="filterYear"></select></div>
   </div>
 </div>
 
+<!-- 3. WHERE DID MONEY GO -->
 <div class="card">
-  <h3 style="margin:0 0 6px">Add Transaction</h3>
-  <input id="desc" placeholder="Description e.g. Sold tomatoes / Lunch">
-  <div class="row">
-    <select id="type" onchange="updateCats()"><option value="Income">Income</option><option value="Expense">Expense</option></select>
-    <select id="cat"></select>
-    <input type="number" id="amt" placeholder="Amount UGX">
-  </div>
-  <div class="row"><input type="date" id="date"><button onclick="addTx()">Add Transaction</button></div>
-</div>
-
-<div class="card">
-  <h3 style="margin:0 0 6px">Where Did Money Go?</h3>
+  <h3>Where Did Money Go?</h3>
   <div id="bars">No expenses yet</div>
 </div>
 
+<!-- 4. YEARLY SUMMARY -->
 <div class="card">
-  <h3 style="margin:0 0 6px">Yearly Summary - <span id="yearLabel">2026</span></h3>
+  <h3>Yearly Summary - <span id="yearLabel">2026</span></h3>
   <div class="year-grid" id="yearGrid"></div>
 </div>
 
+<!-- 5. SETTINGS CATEGORIES -->
 <div class="card">
-  <h3 style="margin:0 0 6px">Settings - Categories</h3>
+  <h3>Settings - Categories</h3>
   <div class="row"><input id="newCat" placeholder="New category e.g. Transport"><select id="catType"><option>Income</option><option>Expense</option></select></div>
   <button class="secondary" onclick="addCat()" style="margin-top:6px">Add Category</button>
-  <div id="catList" style="margin-top:8px;font-size:13px"></div>
+  <div id="catList" style="margin-top:8px;font-size:13px;color:#bbb"></div>
 </div>
 
+<!-- 6. TRANSACTIONS -->
 <div class="card">
-  <h3 style="margin:0 0 6px">Transactions</h3>
+  <h3>Transactions</h3>
   <table><thead><tr><th>Date</th><th>Desc</th><th>Cat</th><th>Type</th><th>Amount</th><th></th></tr></thead><tbody id="txList"></tbody></table>
-  <button class="danger" onclick="clearAll()" style="margin-top:10px">Clear All Data</button>
 </div>
+
+<!-- 7. TOOLS - MOVED DOWN HERE, NEXT TO CLEAR DATA AS YOU ASKED -->
+<div class="card">
+  <h3>⚙️ Tools & Backup</h3>
+  <div class="row">
+    <button class="secondary" onclick="exportCSV()">Export Excel (CSV)</button>
+    <button class="secondary" onclick="downloadBackup()">⬇ Backup Data</button>
+  </div>
+  <div class="row">
+    <button class="secondary" onclick="document.getElementById('restoreFile').click()">⬆ Restore Backup</button>
+    <input type="file" id="restoreFile" accept=".json" class="hidden" onchange="restoreBackup(event)">
+    <button class="secondary" onclick="lockApp()">🔒 Lock App</button>
+  </div>
+  <div class="row">
+    <button class="secondary small" onclick="changePin()">Change PIN</button>
+    <button class="danger" onclick="clearAll()">Clear Data</button>
+  </div>
+  <p style="font-size:11px;color:#888;text-align:center;margin:10px 0 0">Backup weekly: Backup Data > Send file to WhatsApp / Drive</p>
+</div>
+
 </div>
 
 <script>
@@ -110,19 +138,17 @@ let txs = JSON.parse(localStorage.getItem('mt_txs')||'[]');
 let cats = JSON.parse(localStorage.getItem('mt_cats')||'{"Income":["Sales","Salary","Other"],"Expense":["Food","Transport","Rent","Airtime","Other"]}');
 const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const fmt=n=>Number(n).toLocaleString('en-UG');
-
 function save(){localStorage.setItem('mt_txs',JSON.stringify(txs));localStorage.setItem('mt_cats',JSON.stringify(cats));render();}
 function updateCats(){let t=document.getElementById('type').value;let s=document.getElementById('cat');s.innerHTML=cats[t].map(c=>`<option>${c}</option>`).join('');}
 function addTx(){
   let d=document.getElementById('desc').value.trim(),a=parseFloat(document.getElementById('amt').value),dt=document.getElementById('date').value;
   if(!d||!a||!dt) return alert('Fill description, amount and date');
   txs.unshift({desc:d,type:document.getElementById('type').value,cat:document.getElementById('cat').value,amt:a,date:dt});
-  document.getElementById('desc').value='';document.getElementById('amt').value='';save();
+  document.getElementById('desc').value='';document.getElementById('amt').value='';document.getElementById('desc').focus();save();
 }
 function delTx(i){if(confirm('Delete this?')){txs.splice(i,1);save();}}
 function addCat(){let n=document.getElementById('newCat').value.trim(),t=document.getElementById('catType').value;if(!n)return;if(!cats[t].includes(n))cats[t].push(n);document.getElementById('newCat').value='';save();updateCats();}
 function clearAll(){if(confirm('Delete ALL transactions? Backup first!')){txs=[];save();}}
-
 function render(){
   let fm=document.getElementById('filterMonth').value, fy=document.getElementById('filterYear').value;
   let filtered=txs.filter(t=>{let [y,m]=t.date.split('-');return (!fm||m==fm)&&(!fy||y==fy);});
@@ -132,29 +158,25 @@ function render(){
   document.getElementById('totalExp').textContent=fmt(exp);
   document.getElementById('totalBal').textContent=fmt(inc-exp);
   document.getElementById('yearLabel').textContent=fy||'2026';
-  // bars
   let byCat={};filtered.filter(t=>t.type=='Expense').forEach(t=>byCat[t.cat]=(byCat[t.cat]||0)+t.amt);
   let max=Math.max(...Object.values(byCat),1);
   document.getElementById('bars').innerHTML=Object.keys(byCat).length?Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="bar-row"><span>${k}</span><div class="bar"><i style="width:${v/max*100}%"></i></div><b>${fmt(v)}</b></div>`).join(''):'No expenses yet';
-  // year
   let y=parseInt(fy||new Date().getFullYear());
   document.getElementById('yearGrid').innerHTML=months.map((mn,i)=>{let mm=String(i+1).padStart(2,'0');let ti=txs.filter(t=>t.date.startsWith(y+'-'+mm)&&t.type=='Income').reduce((s,t)=>s+t.amt,0);let te=txs.filter(t=>t.date.startsWith(y+'-'+mm)&&t.type=='Expense').reduce((s,t)=>s+t.amt,0);return `<div><b>${mn}</b><br><span class="inc">+${fmt(ti)}</span><br><span class="exp">-${fmt(te)}</span></div>`}).join('');
-  // list - show filtered, but delete needs original index
   document.getElementById('txList').innerHTML=filtered.map(t=>{let idx=txs.indexOf(t);return `<tr><td>${t.date}</td><td>${t.desc}</td><td>${t.cat}</td><td><span class="badge ${t.type}">${t.type}</span></td><td>${fmt(t.amt)}</td><td><button class="danger small" onclick="delTx(${idx})">X</button></td></tr>`}).join('')||'<tr><td colspan=6>No transactions</td></tr>';
   document.getElementById('catList').innerHTML='Income: '+cats.Income.join(', ')+'<br>Expense: '+cats.Expense.join(', ');
 }
 function exportCSV(){
   let rows=[['Date','Description','Category','Type','Amount']];txs.forEach(t=>rows.push([t.date,t.desc,t.cat,t.type,t.amt]));
-  let csv=rows.map(r=>r.join(',')).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='moneytracker.csv';a.click();
+  let csv=rows.map(r=>r.join(',')).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='moneytrack.csv';a.click();
 }
 function downloadBackup(){
   let data={txs,cats,exported:new Date().toISOString()};
-  let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));a.download='moneytracker-backup.json';a.click();alert('Backup downloaded! Save it in WhatsApp / Drive.');
+  let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));a.download='moneytrack-backup.json';a.click();alert('Backup downloaded! Save it in WhatsApp / Drive.');
 }
 function restoreBackup(e){
   let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(d.txs){txs=d.txs;cats=d.cats||cats;save();alert('Restored '+txs.length+' transactions!');}else alert('Invalid backup file');}catch{alert('Invalid backup file');}};r.readAsText(f);
 }
-// PIN LOGIC
 function handlePin(){
   let pin=document.getElementById('pinInput').value, conf=document.getElementById('pinConfirm').value;
   let saved=localStorage.getItem('mt_pin');
@@ -170,13 +192,11 @@ function unlock(){document.getElementById('lockScreen').classList.add('hidden');
 function lockApp(){document.getElementById('lockScreen').classList.remove('hidden');document.getElementById('pinInput').value='';document.getElementById('lockText').textContent='Enter your PIN to unlock';document.getElementById('pinConfirm').classList.add('hidden');}
 function changePin(){let np=prompt('Enter new 4-digit PIN');if(np&&np.length===4){localStorage.setItem('mt_pin',np);alert('PIN changed');}else alert('PIN must be 4 digits');}
 function forgotPin(){if(confirm('Forgot PIN will CLEAR all data. Continue?')){localStorage.removeItem('mt_pin');localStorage.removeItem('mt_txs');txs=[];location.reload();}}
-// init filters
 let fm=document.getElementById('filterMonth');fm.innerHTML='<option value="">All Months</option>'+months.map((m,i)=>`<option value="${String(i+1).padStart(2,'0')}">${m}</option>`).join('');
 let fy=document.getElementById('filterYear');fy.innerHTML=[2025,2026,2027].map(y=>`<option ${y==2026?'selected':''}>${y}</option>`).join('');
 fm.value=String(new Date().getMonth()+1).padStart(2,'0');
 fm.onchange=fy.onchange=render;
 document.getElementById('date').value=new Date().toISOString().slice(0,10);
-// lock init
 if(!localStorage.getItem('mt_pin')){document.getElementById('pinConfirm').classList.remove('hidden');}else{document.getElementById('lockText').textContent='Enter your PIN to unlock';}
 updateCats();render();
 </script>
