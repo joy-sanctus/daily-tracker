@@ -12,8 +12,7 @@
 .card{background:#1e1e1e;border:1px solid #333;border-radius:14px;padding:14px;margin-bottom:12px}
 .row{display:flex;gap:8px;flex-wrap:wrap} .row>*{flex:1;min-width:120px}
 input,select,button{width:100%;padding:12px;border-radius:10px;border:1px solid #444;font-size:16px;margin-top:8px;background:#2a2a2a;color:#fff}
-input::placeholder{color:#999}
-select option{background:#2a2a2a}
+input::placeholder{color:#999} select option{background:#2a2a2a}
 button{background:#00a651;color:#fff;border:none;font-weight:bold;cursor:pointer;font-size:16px;padding:14px}
 button.secondary{background:#333;color:#fff} button.danger{background:#c0392b} button.small{padding:9px;font-size:13px}
 label{font-size:13px;color:#bbb}
@@ -24,18 +23,31 @@ label{font-size:13px;color:#bbb}
 .bar{flex:1;background:#333;height:20px;border-radius:10px;overflow:hidden} .bar i{display:block;height:100%;background:#ff9500}
 table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:9px;border-bottom:1px solid #333;text-align:left}
 .badge{padding:4px 9px;border-radius:20px;font-size:11px;color:#fff} .badge.Income{background:#00a651} .badge.Expense{background:#c0392b}
-#lockScreen{position:fixed;inset:0;background:#0f3d24;display:flex;align-items:center;justify-content:center;z-index:99;padding:16px}
-#lockBox{background:#1e1e1e;border:1px solid #333;border-radius:16px;padding:22px;width:100%;max-width:360px;text-align:center;color:#fff}
-#lockBox h2{margin:0 0 6px} #lockBox p{color:#bbb;font-size:13px}
+#testerScreen,#lockScreen{position:fixed;inset:0;background:#0f3d24;display:flex;align-items:center;justify-content:center;z-index:99;padding:16px}
+#testerBox,#lockBox{background:#1e1e1e;border:1px solid #333;border-radius:16px;padding:22px;width:100%;max-width:360px;text-align:center;color:#fff}
+#testerBox h2,#lockBox h2{margin:0 0 6px} #testerBox p,#lockBox p{color:#bbb;font-size:13px}
 .hidden{display:none!important}
 .year-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .year-grid div{background:#2a2a2a;border:1px solid #333;border-radius:10px;padding:9px;font-size:12px;text-align:center}
 h3{margin:0 0 8px;color:#fff}
+.footer{text-align:center;color:#777;font-size:11px;padding:10px;line-height:1.5}
 </style>
 </head>
 <body>
 
-<div id="lockScreen">
+<!-- LOCK 1 - TESTER CODE -->
+<div id="testerScreen">
+  <div id="testerBox">
+    <h2>🔐 MoneyTrack UG</h2>
+    <p><b>Private Testing Version</b><br>Enter Tester Access Code to continue.<br>Ask Joy for the code if you don't have it.</p>
+    <input type="text" id="testerInput" placeholder="Enter Tester Code" autocomplete="off">
+    <button onclick="checkTester()">Enter App</button>
+    <p style="font-size:11px;color:#888">© MoneyTrack UG - Joy Sanctus - Do Not Copy or Share</p>
+  </div>
+</div>
+
+<!-- LOCK 2 - PERSONAL PIN -->
+<div id="lockScreen" class="hidden">
   <div id="lockBox">
     <h2>🔒 MoneyTrack UG</h2>
     <p id="lockText">Create a 4-digit PIN to protect your money</p>
@@ -48,21 +60,17 @@ h3{margin:0 0 8px;color:#fff}
 </div>
 
 <div id="app">
-
-<!-- TOP BAR - AS YOU ASKED -->
 <div class="top">
   <h1>MoneyTrack UG</h1>
   <p>Daily Income &amp; expenses. UGX. Individuals, Small businesses, SACCOs, Institutions.</p>
 </div>
 
-<!-- SUMMARY - STILL AT TOP SO YOU SEE BALANCE FAST -->
 <div class="card summary">
   <div><span>Income</span><b class="inc" id="totalInc">0</b></div>
   <div><span>Expense</span><b class="exp" id="totalExp">0</b></div>
   <div><span>Balance</span><b class="bal" id="totalBal">0</b></div>
 </div>
 
-<!-- 1. ADD TRANSACTION - FIRST THING YOU SEE -->
 <div class="card" style="border:2px solid #00a651">
   <h3>➕ Add Transaction</h3>
   <input id="desc" placeholder="What is it? e.g. Sold tomatoes / Lunch">
@@ -77,7 +85,6 @@ h3{margin:0 0 8px;color:#fff}
   <button onclick="addTx()">Add Transaction</button>
 </div>
 
-<!-- 2. FILTER -->
 <div class="card">
   <h3>Filter</h3>
   <div class="row">
@@ -86,19 +93,16 @@ h3{margin:0 0 8px;color:#fff}
   </div>
 </div>
 
-<!-- 3. WHERE DID MONEY GO -->
 <div class="card">
   <h3>Where Did Money Go?</h3>
   <div id="bars">No expenses yet</div>
 </div>
 
-<!-- 4. YEARLY SUMMARY -->
 <div class="card">
   <h3>Yearly Summary - <span id="yearLabel">2026</span></h3>
   <div class="year-grid" id="yearGrid"></div>
 </div>
 
-<!-- 5. SETTINGS CATEGORIES -->
 <div class="card">
   <h3>Settings - Categories</h3>
   <div class="row"><input id="newCat" placeholder="New category e.g. Transport"><select id="catType"><option>Income</option><option>Expense</option></select></div>
@@ -106,13 +110,11 @@ h3{margin:0 0 8px;color:#fff}
   <div id="catList" style="margin-top:8px;font-size:13px;color:#bbb"></div>
 </div>
 
-<!-- 6. TRANSACTIONS -->
 <div class="card">
   <h3>Transactions</h3>
   <table><thead><tr><th>Date</th><th>Desc</th><th>Cat</th><th>Type</th><th>Amount</th><th></th></tr></thead><tbody id="txList"></tbody></table>
 </div>
 
-<!-- 7. TOOLS - MOVED DOWN HERE, NEXT TO CLEAR DATA AS YOU ASKED -->
 <div class="card">
   <h3>⚙️ Tools & Backup</h3>
   <div class="row">
@@ -131,13 +133,35 @@ h3{margin:0 0 8px;color:#fff}
   <p style="font-size:11px;color:#888;text-align:center;margin:10px 0 0">Backup weekly: Backup Data > Send file to WhatsApp / Drive</p>
 </div>
 
+<div class="footer">© 2026 MoneyTrack UG - Joy Sanctus<br>Private Testing - Do Not Copy, Share or Replicate<br>Daily Income & Expenses for Individuals, Small businesses, SACCOs, Institutions</div>
 </div>
 
 <script>
+// ===== CHANGE YOUR TESTER CODE HERE =====
+const TESTER_CODE = "MONEY2026";
+// To change code, just change MONEY2026 above to your new code, e.g. "JOY123" and Commit again.
+// ==========================================
+
 let txs = JSON.parse(localStorage.getItem('mt_txs')||'[]');
 let cats = JSON.parse(localStorage.getItem('mt_cats')||'{"Income":["Sales","Salary","Other"],"Expense":["Food","Transport","Rent","Airtime","Other"]}');
 const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const fmt=n=>Number(n).toLocaleString('en-UG');
+
+// TESTER CODE LOGIC
+function checkTester(){
+  let v=document.getElementById('testerInput').value.trim();
+  if(v===TESTER_CODE){
+    sessionStorage.setItem('mt_tester','yes');
+    document.getElementById('testerScreen').classList.add('hidden');
+    document.getElementById('lockScreen').classList.remove('hidden');
+  } else { alert('Wrong Tester Code. Ask Joy for the correct code.'); }
+}
+// If tester already entered code in this session, skip tester screen
+if(sessionStorage.getItem('mt_tester')==='yes'){
+  document.getElementById('testerScreen').classList.add('hidden');
+  document.getElementById('lockScreen').classList.remove('hidden');
+}
+
 function save(){localStorage.setItem('mt_txs',JSON.stringify(txs));localStorage.setItem('mt_cats',JSON.stringify(cats));render();}
 function updateCats(){let t=document.getElementById('type').value;let s=document.getElementById('cat');s.innerHTML=cats[t].map(c=>`<option>${c}</option>`).join('');}
 function addTx(){
